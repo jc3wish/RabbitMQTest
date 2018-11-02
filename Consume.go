@@ -6,7 +6,7 @@ import (
 )
 
 
-func Cosume(Channel *Channel,QueueName *string) error{
+func Cosume(Channel *Channel,QueueName *string,ConsumeCount *int) error{
 	msgs, err := Channel.ch.Consume(
 		*QueueName, // queue
 		"",     // consumer
@@ -19,10 +19,16 @@ func Cosume(Channel *Channel,QueueName *string) error{
 	if err != nil{
 		return err
 	}
+	var HadCosumeCount int = 0
 	for{
 		select {
 		case	d := <-msgs:
 			d.Ack(false)
+			HadCosumeCount++
+			if HadCosumeCount >= *ConsumeCount && *ConsumeCount>0{
+				Channel.ch.Close()
+				return nil
+			}
 			break
 		case <-time.After(time.Duration(Channel.ConsumeTimeOut) * time.Second):
 			Channel.ch.Close()

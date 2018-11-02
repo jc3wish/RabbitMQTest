@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"encoding/base64"
 	"encoding/json"
+	"strings"
 )
 
 type queueInfo struct {
@@ -21,5 +22,15 @@ func GetQueuesByUrl(url string,user string,pwd string) *[]queueInfo{
 	var qList []queueInfo
 	qList = make([]queueInfo,0)
 	json.Unmarshal(body,&qList)
+	return &qList
+}
+
+func GetQueuesByConfig(QeueuList string) *[]queueInfo{
+	s := strings.Split(QeueuList,",")
+	qList := make([]queueInfo,0)
+	for _,v := range s{
+		q := strings.Split(v,":")
+		qList = append(qList, queueInfo{Vhost:q[0],Queue:q[1]});
+	}
 	return &qList
 }

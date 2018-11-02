@@ -23,7 +23,7 @@ func Start(){
 			}
 		}
 	}
-	TestStartTime := time.Now().Unix()
+	TestStartTime := time.Now().UnixNano() / 1e6
 	for key,m := range config.MyConf{
 		if _,ok:=m["Method"];!ok{
 			log.Println(key," Method not exsit")
@@ -49,7 +49,7 @@ func Start(){
 	}
 
 	if NeenBackCount == 0{
-		TestEndTime := time.Now().Unix()
+		TestEndTime := time.Now().UnixNano() / 1e6
 		log.Println("Test Over:",TestEndTime,"Use Time(ms):",TestEndTime-TestStartTime)
 		return
 	}
@@ -58,7 +58,7 @@ func Start(){
 		<- resultBackChan
 		HacBackCount++
 		if HacBackCount >= NeenBackCount{
-			TestEndTime := time.Now().Unix()
+			TestEndTime := time.Now().UnixNano() / 1e6
 			log.Println("Test Over:",TestEndTime,"Use Time(ms):",TestEndTime-TestStartTime)
 			os.Exit(0)
 		}
