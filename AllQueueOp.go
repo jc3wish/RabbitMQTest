@@ -81,6 +81,7 @@ func AllQueueOp(key string,config map[string]string,resultBackChan chan int){
 		default:
 			m2 := make(map[string]string)
 			NeedWaitCount += 2
+			m2["Uri"] = m["Uri"]
 			m2["QueueName"] = qInfo.Queue
 			m2["ConnectCount"] = config["CosumeConnectCount"]
 			m2["ConsumeTimeOut"] = config["ConsumeTimeOut"]
