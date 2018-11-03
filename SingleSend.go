@@ -23,7 +23,7 @@ func SingleSend(key string,config map[string]string,resultDataChan chan *Result)
 
 	var WaitConfirmBool bool
 
-	sizeArr := strings.Split(config["DateSize"], ",")
+	sizeArr := strings.Split(config["DataSize"], ",")
 	sizeLen := len(sizeArr)
 	BodyList := make([]*[]byte,sizeLen)
 	for k,size:=range sizeArr{

@@ -107,7 +107,7 @@ func Start(){
 		if HacBackCount >= NeenBackCount{
 			TestEndTime := time.Now().UnixNano() / 1e6
 			fmt.Println(" ")
-			UseTime := int(TestEndTime-TestStartTime)
+			UseTime := float64(TestEndTime-TestStartTime)
 			log.Println("Test Over:",TestEndTime,"Use Time(ms):",UseTime)
 			fmt.Println("ConnectSuccess:",ResultData.ConnectSuccess)
 			fmt.Println("ConnectFail:",ResultData.ConnectFail)
@@ -116,8 +116,8 @@ func Start(){
 			fmt.Println("WriteSuccess:",ResultData.WriteSuccess)
 			fmt.Println("WriteFail:",ResultData.WriteFail)
 			fmt.Println("CosumeSuccess:",ResultData.CosumeSuccess)
-			fmt.Println("Write QPS:",ResultData.WriteSuccess/UseTime*1000)
-			fmt.Println("Consume QPS:",ResultData.CosumeSuccess/UseTime*1000)
+			fmt.Println("Write QPS:",float64(ResultData.WriteSuccess)/UseTime*1000)
+			fmt.Println("Consume QPS:",float64(ResultData.CosumeSuccess)/UseTime*1000)
 			os.Exit(0)
 		}
 	}

@@ -3,7 +3,8 @@
 
 #### 编译
 ```
-go build ./Start/StartTest.go
+cd Start
+go build ./StartTest.go
 
 ```
 
@@ -20,9 +21,10 @@ RoutingKey=testQueue
 
 #写入等待返回多久
 WriteTimeOut=10
+#1不持久化  , 2 持久化
 DeliveryMode=2
 #写入的数据大小,多个用逗号隔开,随机写入,单位byte
-DateSize=1024,4096
+DataSize=1024,4096
 #连接数
 ConnectCount=1
 #每个连接开启多个通道
@@ -82,13 +84,17 @@ ChanneWriteCount=1000
 #开启cofirm机制
 WaitConfirm=1
 
-DateSize=1024
+DataSize=1024
 
 #持久化
 DeliveryMode=2
 
 #写入操作的时候 ,采用哪一个交换机,这里routingkey强制采用队列名作为routingkey,并且 交换机和routingkey,队列名的绑定关系 ,得事先绑好
-ExchangeName=amq.direct
+#如果采用默认交换机,则不用填写
+#ExchangeName=amq.direct
+
+ContinueCount=80
+ContinueCountSleepTime=2
 
 
 [allQueueConsume]
@@ -119,14 +125,16 @@ WriteTimeOut=20
 WriteConnectCount=1
 ChannelCount=1
 WaitConfirm=1
-DateSize=1024
+DataSize=1024
 DeliveryMode=2
 ChanneWriteCount=1000
 ConsumeTimeOut=20
 ConsumeCount=1000
 CosumeConnectCount=1
 AutoAck=1
-ExchangeName=amq.direct
+#ExchangeName=amq.direct
+ContinueCount=80
+ContinueCountSleepTime=2
 
 
 [only_connect]

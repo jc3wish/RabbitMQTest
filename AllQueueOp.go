@@ -61,7 +61,7 @@ func AllQueueOp(key string,config map[string]string,resultDataChan chan *Result)
 		case "all_write":
 			m["ConnectCount"] = config["ConnectCount"]
 			m["DeliveryMode"] = config["DeliveryMode"]
-			m["DateSize"] = config["DateSize"]
+			m["DataSize"] = config["DataSize"]
 			m["ChannelCount"] = config["ChannelCount"]
 			m["ChanneWriteCount"] = config["ChanneWriteCount"]
 			m["WaitConfirm"] = config["WaitConfirm"]
@@ -114,7 +114,7 @@ func AllQueueOp(key string,config map[string]string,resultDataChan chan *Result)
 
 			m["ConnectCount"] = config["WriteConnectCount"]
 			m["DeliveryMode"] = config["DeliveryMode"]
-			m["DateSize"] = config["DateSize"]
+			m["DataSize"] = config["DataSize"]
 			m["ChannelCount"] = config["ChannelCount"]
 			m["ChanneWriteCount"] = config["ChanneWriteCount"]
 			m["WaitConfirm"] = config["WaitConfirm"]
@@ -151,7 +151,7 @@ func AllQueueOp(key string,config map[string]string,resultDataChan chan *Result)
 		case <-time.After(100 * time.Second):
 			AllEndTime := time.Now().UnixNano() / 1e6
 			fmt.Println(" ")
-			UseTime := int(AllEndTime-AllStartTime)
+			UseTime := float64(AllEndTime-AllStartTime)
 			log.Println(key,"AllQueueOp end",AllEndTime," had use time(ms):",UseTime)
 			fmt.Println("ConnectSuccess:",ResultData.ConnectSuccess)
 			fmt.Println("ConnectFail:",ResultData.ConnectFail)
@@ -160,14 +160,14 @@ func AllQueueOp(key string,config map[string]string,resultDataChan chan *Result)
 			fmt.Println("WriteSuccess:",ResultData.WriteSuccess)
 			fmt.Println("WriteFail:",ResultData.WriteFail)
 			fmt.Println("CosumeSuccess:",ResultData.CosumeSuccess)
-			fmt.Println("Write QPS:",ResultData.WriteSuccess/UseTime*1000)
-			fmt.Println("Consume QPS:",ResultData.CosumeSuccess/UseTime*1000)
+			fmt.Println("Write QPS:",float64(ResultData.WriteSuccess)/UseTime*1000)
+			fmt.Println("Consume QPS:",float64(ResultData.CosumeSuccess)/UseTime*1000)
 			break
 		}
 	}
 	AllEndTime := time.Now().UnixNano() / 1e6
 	fmt.Println(" ")
-	UseTime := int(AllEndTime-AllStartTime)
+	UseTime := float64(AllEndTime-AllStartTime)
 
 	log.Println(key,"AllQueueOp end",AllEndTime," time(ms):",UseTime)
 	fmt.Println("ConnectSuccess:",ResultData.ConnectSuccess)
@@ -177,7 +177,7 @@ func AllQueueOp(key string,config map[string]string,resultDataChan chan *Result)
 	fmt.Println("WriteSuccess:",ResultData.WriteSuccess)
 	fmt.Println("WriteFail:",ResultData.WriteFail)
 	fmt.Println("CosumeSuccess:",ResultData.CosumeSuccess)
-	fmt.Println("Write QPS:",ResultData.WriteSuccess/UseTime*1000)
-	fmt.Println("Consume QPS:",ResultData.CosumeSuccess/UseTime*1000)
+	fmt.Println("Write QPS:",float64(ResultData.WriteSuccess)/UseTime*1000)
+	fmt.Println("Consume QPS:",float64(ResultData.CosumeSuccess)/UseTime*1000)
 
 }
