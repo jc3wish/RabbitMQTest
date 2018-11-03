@@ -134,6 +134,7 @@ func AllQueueOp(key string,config map[string]string,resultDataChan chan *Result)
 		}
 	}
 	AllEndTime := time.Now().UnixNano() / 1e6
+	fmt.Println(" ")
 	log.Println(key,"AllQueueOp end",AllEndTime," time(ms):",AllEndTime-AllStartTime)
 	fmt.Println("ConnectSuccess:",ResultData.ConnectSuccess)
 	fmt.Println("ConnectFail:",ResultData.ConnectFail)

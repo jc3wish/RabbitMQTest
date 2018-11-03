@@ -82,6 +82,7 @@ func Start(){
 		HacBackCount++
 		if HacBackCount >= NeenBackCount{
 			TestEndTime := time.Now().UnixNano() / 1e6
+			fmt.Println(" ")
 			log.Println("Test Over:",TestEndTime,"Use Time(ms):",TestEndTime-TestStartTime)
 			fmt.Println("ConnectSuccess:",ResultData.ConnectSuccess)
 			fmt.Println("ConnectFail:",ResultData.ConnectFail)
