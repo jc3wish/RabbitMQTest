@@ -33,7 +33,21 @@ func AllQueueOp(key string,config map[string]string,resultDataChan chan *Result)
 
 	log.Println(key,"AllQueueOp start",AllStartTime)
 
+	var ContinueCount int
+	var ContinueCountSleepTime int
+	if _,ok:= config["ContinueCount"];ok{
+		ContinueCount = GetIntDefault(config["ContinueCount"],0)
+	}
+
+	if _,ok:= config["ContinueCountSleepTime"];ok{
+		ContinueCountSleepTime = GetIntDefault(config["ContinueCountSleepTime"],0)
+	}
+
+
 	for keyI,qInfo := range *qList{
+		if keyI >0 && ContinueCount > 0 && keyI % ContinueCount == 0{
+			time.Sleep(time.Duration(ContinueCountSleepTime) * time.Second)
+		}
 		m := make(map[string]string)
 		if qInfo.Vhost == "/"{
 			m["Uri"] = "amqp://"+AmqpAdmin+":"+AmqpPwd+"@"+AmqpUri+"/"
@@ -119,23 +133,43 @@ func AllQueueOp(key string,config map[string]string,resultDataChan chan *Result)
 	if NeedWaitCount == 0{
 		return
 	}
+	loop:
 	for{
-		data := <- ResultChan
-		ResultData.ConnectSuccess += data.ConnectSuccess
-		ResultData.ConnectFail += data.ConnectFail
-		ResultData.ChannelSuccess += data.ChannelSuccess
-		ResultData.ChanneFail += data.ChanneFail
-		ResultData.WriteSuccess += data.WriteSuccess
-		ResultData.WriteFail += data.WriteFail
-		ResultData.CosumeSuccess += data.CosumeSuccess
-		OverCount++
-		if OverCount >= NeedWaitCount{
+		select {
+		case data := <-ResultChan:
+			ResultData.ConnectSuccess += data.ConnectSuccess
+			ResultData.ConnectFail += data.ConnectFail
+			ResultData.ChannelSuccess += data.ChannelSuccess
+			ResultData.ChanneFail += data.ChanneFail
+			ResultData.WriteSuccess += data.WriteSuccess
+			ResultData.WriteFail += data.WriteFail
+			ResultData.CosumeSuccess += data.CosumeSuccess
+			OverCount++
+			if OverCount >= NeedWaitCount {
+				break loop
+			}
+		case <-time.After(100 * time.Second):
+			AllEndTime := time.Now().UnixNano() / 1e6
+			fmt.Println(" ")
+			UseTime := int(AllEndTime-AllStartTime)
+			log.Println(key,"AllQueueOp end",AllEndTime," had use time(ms):",UseTime)
+			fmt.Println("ConnectSuccess:",ResultData.ConnectSuccess)
+			fmt.Println("ConnectFail:",ResultData.ConnectFail)
+			fmt.Println("ChannelSuccess:",ResultData.ChannelSuccess)
+			fmt.Println("ChanneFail:",ResultData.ChanneFail)
+			fmt.Println("WriteSuccess:",ResultData.WriteSuccess)
+			fmt.Println("WriteFail:",ResultData.WriteFail)
+			fmt.Println("CosumeSuccess:",ResultData.CosumeSuccess)
+			fmt.Println("Write QPS:",ResultData.WriteSuccess/UseTime*1000)
+			fmt.Println("Consume QPS:",ResultData.CosumeSuccess/UseTime*1000)
 			break
 		}
 	}
 	AllEndTime := time.Now().UnixNano() / 1e6
 	fmt.Println(" ")
-	log.Println(key,"AllQueueOp end",AllEndTime," time(ms):",AllEndTime-AllStartTime)
+	UseTime := int(AllEndTime-AllStartTime)
+
+	log.Println(key,"AllQueueOp end",AllEndTime," time(ms):",UseTime)
 	fmt.Println("ConnectSuccess:",ResultData.ConnectSuccess)
 	fmt.Println("ConnectFail:",ResultData.ConnectFail)
 	fmt.Println("ChannelSuccess:",ResultData.ChannelSuccess)
@@ -143,4 +177,7 @@ func AllQueueOp(key string,config map[string]string,resultDataChan chan *Result)
 	fmt.Println("WriteSuccess:",ResultData.WriteSuccess)
 	fmt.Println("WriteFail:",ResultData.WriteFail)
 	fmt.Println("CosumeSuccess:",ResultData.CosumeSuccess)
+	fmt.Println("Write QPS:",ResultData.WriteSuccess/UseTime*1000)
+	fmt.Println("Consume QPS:",ResultData.CosumeSuccess/UseTime*1000)
+
 }

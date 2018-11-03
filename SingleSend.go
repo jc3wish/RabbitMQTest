@@ -84,14 +84,40 @@ func SingleSend(key string,config map[string]string,resultDataChan chan *Result)
 		}
 	}
 
-	for{
-		FailCount := <-ResultChan
-		ResultData.WriteFail += FailCount
-		ResultData.WriteSuccess += ChanneWriteCount-FailCount
-		OverCount++
-		if OverCount >= NeedWaitCount{
-			break
+	if NeedWaitCount > 0 {
+		for{
+			FailCount := <-ResultChan
+			ResultData.WriteFail += FailCount
+			ResultData.WriteSuccess += ChanneWriteCount - FailCount
+			OverCount++
+			if OverCount >= NeedWaitCount {
+				break
+			}
 		}
+		/*
+		loop:
+		for {
+			select {
+			case FailCount := <-ResultChan:
+				ResultData.WriteFail += FailCount
+				ResultData.WriteSuccess += ChanneWriteCount - FailCount
+				OverCount++
+				if OverCount >= NeedWaitCount {
+					break loop
+				}
+			case <-time.After(100 * time.Second):
+				log.Println(key, "single Send time after,had use time:", time.Now().UnixNano()/1e6-SendStartTime)
+				fmt.Println("ConnectSuccess:", ResultData.ConnectSuccess)
+				fmt.Println("ConnectFail:", ResultData.ConnectFail)
+				fmt.Println("ChannelSuccess:", ResultData.ChannelSuccess)
+				fmt.Println("ChanneFail:", ResultData.ChanneFail)
+				fmt.Println("WriteSuccess:", ResultData.WriteSuccess)
+				fmt.Println("WriteFail:", ResultData.WriteFail)
+				fmt.Println("CosumeSuccess:", ResultData.CosumeSuccess)
+				break
+			}
+		}
+		*/
 	}
 	SendEndTime := time.Now().UnixNano() / 1e6
 	log.Println(key,"SingleSend end",SendEndTime," time(ms):",SendEndTime-SendStartTime)

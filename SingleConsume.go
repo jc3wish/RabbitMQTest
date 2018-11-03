@@ -35,7 +35,7 @@ func SingleConsume(key string,config map[string]string,resultDataChan chan *Resu
 
 	OverCount := 0
 	NeedWaitCount := ConnectCount
-	ResultChan := make(chan int,NeedWaitCount)
+	ResultChan := make(chan int,NeedWaitCount+2)
 
 	SingleStartTime := time.Now().UnixNano() / 1e6
 	log.Println(key,"SingleConsume start",SingleStartTime)
@@ -78,7 +78,7 @@ func SingleConsume(key string,config map[string]string,resultDataChan chan *Resu
 					select {
 					case d :=<-msgs:
 						if AutoAck == 1{
-							d.Ack(true)
+							d.Ack(false)
 						}
 						HadCosumeCount++
 						if HadCosumeCount >= ConsumeCount && ConsumeCount > 0 {
@@ -100,12 +100,14 @@ func SingleConsume(key string,config map[string]string,resultDataChan chan *Resu
 		}(i)
 	}
 
-	for{
-		HadCosumeCount := <-ResultChan
-		ResultData.CosumeSuccess+=HadCosumeCount
-		OverCount++
-		if OverCount >= NeedWaitCount{
-			break
+	if NeedWaitCount >0{
+		for{
+			HadCosumeCount := <-ResultChan
+			ResultData.CosumeSuccess+=HadCosumeCount
+			OverCount++
+			if OverCount >= NeedWaitCount{
+				break
+			}
 		}
 	}
 	SingleEndTime := time.Now().UnixNano() / 1e6

@@ -102,6 +102,11 @@ AmqpPwd=admintest
 ConnectCount=1
 ConsumeTimeOut=20
 
+#起启多少个队列消费后，sleep [ContinueCountSleepTime] s,0代表不sleep
+ContinueCount=80
+ContinueCountSleepTime=2
+
+
 [allQueueWriteAndConsume]
 #多队列同时写与消费操作,请参考all_write 和 all_consume 参数
 #这里唯一不同的主是 CosumeConnectCount ,WriteConnectCount 分别表示每个队列的消费者数量和每个队列写入开启多少个连接,和 ConnectCount同义,但这里配置 ConnectCount 无效
