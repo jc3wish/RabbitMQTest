@@ -4,18 +4,19 @@ import (
 	"time"
 	"log"
 	"strconv"
+	"fmt"
 )
 
-func AllQueueOp(key string,config map[string]string,resultBackChan chan int){
+func AllQueueOp(key string,config map[string]string,resultDataChan chan *Result){
+	ResultData := NewResult()
 	defer func() {
-		resultBackChan <- 1
+		resultDataChan <- ResultData
 	}()
 
 	AmqpUri := config["AmqpUri"]
 	HttpUri := config["HttpUri"]
 	AmqpAdmin := config["AmqpAdmin"]
 	AmqpPwd := config["AmqpPwd"]
-
 
 	var qList *[]queueInfo
 	if _,ok:=config["QueueList"];ok{
@@ -28,7 +29,7 @@ func AllQueueOp(key string,config map[string]string,resultBackChan chan int){
 
 	OverCount := 0
 	NeedWaitCount := 0
-	ResultChan := make(chan int,NeedWaitCount)
+	ResultChan := make(chan *Result,NeedWaitCount)
 
 	log.Println(key,"AllQueueOp start",AllStartTime)
 
@@ -119,7 +120,14 @@ func AllQueueOp(key string,config map[string]string,resultBackChan chan int){
 		return
 	}
 	for{
-		<- ResultChan
+		data := <- ResultChan
+		ResultData.ConnectSuccess += data.ConnectSuccess
+		ResultData.ConnectFail += data.ConnectFail
+		ResultData.ChannelSuccess += data.ChannelSuccess
+		ResultData.ChanneFail += data.ChanneFail
+		ResultData.WriteSuccess += data.WriteSuccess
+		ResultData.WriteFail += data.WriteFail
+		ResultData.CosumeSuccess += data.CosumeSuccess
 		OverCount++
 		if OverCount >= NeedWaitCount{
 			break
@@ -127,4 +135,11 @@ func AllQueueOp(key string,config map[string]string,resultBackChan chan int){
 	}
 	AllEndTime := time.Now().UnixNano() / 1e6
 	log.Println(key,"AllQueueOp end",AllEndTime," time(ms):",AllEndTime-AllStartTime)
+	fmt.Println("ConnectSuccess:",ResultData.ConnectSuccess)
+	fmt.Println("ConnectFail:",ResultData.ConnectFail)
+	fmt.Println("ChannelSuccess:",ResultData.ChannelSuccess)
+	fmt.Println("ChanneFail:",ResultData.ChanneFail)
+	fmt.Println("WriteSuccess:",ResultData.WriteSuccess)
+	fmt.Println("WriteFail:",ResultData.WriteFail)
+	fmt.Println("CosumeSuccess:",ResultData.CosumeSuccess)
 }

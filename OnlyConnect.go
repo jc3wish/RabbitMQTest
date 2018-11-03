@@ -5,7 +5,8 @@ import (
 	"time"
 )
 
-func OnlyConnect(key string,config map[string]string,resultBackChan chan int){
+func OnlyConnect(key string,config map[string]string,resultDataChan chan *Result){
+	ResultData := NewResult()
 	AmqpUri := config["Uri"]
 	ConnectCount := GetIntDefault(config["ConnectCount"],1)
 	ChannelCount := GetIntDefault(config["ChannelCount"],0)
@@ -14,11 +15,18 @@ func OnlyConnect(key string,config map[string]string,resultBackChan chan int){
 	for i:=0;i<ConnectCount;i++{
 		connList[i] = NewConn(AmqpUri)
 		if connList[i].err != nil{
+			ResultData.ConnectFail++
 			log.Println(AmqpUri,"connect err:",connList[i].err)
 			continue
 		}
+		ResultData.ConnectSuccess++
 		for k := 0; k < ChannelCount; k++ {
-			connList[i].NewChannel(false)
+			_,err:=connList[i].NewChannel(false)
+			if err != nil{
+				ResultData.ChanneFail++
+				continue
+			}
+			ResultData.ChannelSuccess++
 		}
 	}
 	if ConnectTimeOut == 0{
@@ -27,5 +35,5 @@ func OnlyConnect(key string,config map[string]string,resultBackChan chan int){
 		time.Sleep(time.Duration(ConnectTimeOut) * time.Second)
 	}
 
-	resultBackChan <- 1
+	resultDataChan <- ResultData
 }

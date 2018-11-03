@@ -11,7 +11,8 @@ import (
 单队列写入操作
 */
 
-func SingleSend(key string,config map[string]string,resultBackChan chan int){
+func SingleSend(key string,config map[string]string,resultDataChan chan *Result){
+	ResultData := NewResult()
 	WriteTimeOut := GetIntDefault(config["WriteTimeOut"],1000)
 	DeliveryMode := uint8(GetIntDefault(config["DeliveryMode"],2))
 
@@ -49,35 +50,44 @@ func SingleSend(key string,config map[string]string,resultBackChan chan int){
 		conn := NewConn(AmqpUri)
 		if conn.err != nil{
 			log.Println(AmqpUri,"connect err:",conn.err)
+			ResultData.ConnectFail++
 			continue
 		}
+		ResultData.ConnectSuccess++
 		for k := 1; k <= ChannelCount; k++ {
 			ch, err := conn.NewChannel(WaitConfirmBool)
 			if err != nil {
 				ResultChan <- 1
 				log.Println(key,"NewChannel err:",k,i,err)
+				ResultData.ChanneFail++
 				continue
 			}
+			ResultData.ChannelSuccess++
 			ch.SetWriteTimeOut(WriteTimeOut)
 			go func(n int,ch *Channel) {
+				FailCount:=0;
 				StartTime:=time.Now().UnixNano() / 1e6
 				log.Println(key,"send channel",n,ExchangeName,RoutingKey,"start",StartTime)
 				for icount := 0; icount < ChanneWriteCount; icount++ {
 					_,err := SendMQ(ch, &ExchangeName, &RoutingKey, &DeliveryMode, BodyList[rand.Intn(sizeLen)])
 					if err != nil{
 						log.Println(key,"sendMQ",err)
+						FailCount++
+						continue
 					}
 				}
 				EndTime := time.Now().UnixNano() / 1e6
 				log.Println(key,"send channel",n,"end",EndTime," time(ms):",EndTime-StartTime,ExchangeName,RoutingKey,"sendCount:",ChanneWriteCount)
-				ResultChan <- 1
+				ResultChan <- FailCount
 				ch.ch.Close()
 			}(k,ch)
 		}
 	}
 
 	for{
-		<-ResultChan
+		FailCount := <-ResultChan
+		ResultData.WriteFail += FailCount
+		ResultData.WriteSuccess += ChanneWriteCount-FailCount
 		OverCount++
 		if OverCount >= NeedWaitCount{
 			break
@@ -85,5 +95,5 @@ func SingleSend(key string,config map[string]string,resultBackChan chan int){
 	}
 	SendEndTime := time.Now().UnixNano() / 1e6
 	log.Println(key,"SingleSend end",SendEndTime," time(ms):",SendEndTime-SendStartTime)
-	resultBackChan <- 1
+	resultDataChan <- ResultData
 }

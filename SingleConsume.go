@@ -9,7 +9,8 @@ import (
 单队消费操作
 */
 
-func SingleConsume(key string,config map[string]string,resultBackChan chan int){
+func SingleConsume(key string,config map[string]string,resultDataChan chan *Result){
+	ResultData := NewResult()
 	ConsumeTimeOut := GetIntDefault(config["ConsumeTimeOut"],100)
 	ConnectCount := GetIntDefault(config["ConnectCount"],1)
 	AutoAck := GetIntDefault(config["AutoAck"],0)
@@ -43,14 +44,18 @@ func SingleConsume(key string,config map[string]string,resultBackChan chan int){
 		if conn.err != nil{
 			ResultChan <- 1
 			log.Println(AmqpUri,"connect err:",conn.err)
+			ResultData.ConnectFail++
 			continue
 		}
+		ResultData.ConnectSuccess++
 		ch, err := conn.NewChannel(false)
 		if err != nil {
 			ResultChan <- 1
 			log.Println(key,"NewChannel err:",i,err)
+			ResultData.ChanneFail++
 			continue
 		}
+		ResultData.ChannelSuccess++
 		ch.SetConsumeTimeOut(ConsumeTimeOut)
 		go func(n int) {
 			StartTime:=time.Now().UnixNano() / 1e6
@@ -89,20 +94,21 @@ func SingleConsume(key string,config map[string]string,resultBackChan chan int){
 			}
 			EndTime := time.Now().UnixNano() / 1e6
 			log.Println(key,"consume channel",n,"end",EndTime," time(ms):",EndTime-StartTime,QueueName,"cosumeCount:",HadCosumeCount)
-			ResultChan <- 1
+			ResultChan <- HadCosumeCount
 			ch.ch.Close()
 			conn.conn.Close()
 		}(i)
 	}
 
 	for{
-		<-ResultChan
+		HadCosumeCount := <-ResultChan
+		ResultData.CosumeSuccess+=HadCosumeCount
 		OverCount++
 		if OverCount >= NeedWaitCount{
 			break
 		}
 	}
 	SingleEndTime := time.Now().UnixNano() / 1e6
+	resultDataChan <- ResultData
 	log.Println(key,"SingleConsume end",SingleEndTime," time(ms):",SingleEndTime-SingleStartTime)
-	resultBackChan <- 1
 }
