@@ -51,7 +51,11 @@ func AllQueueOp(key string,config map[string]string,resultBackChan chan int){
 			m["ChanneWriteCount"] = config["ChanneWriteCount"]
 			m["WaitConfirm"] = config["WaitConfirm"]
 			m["WriteTimeOut"] = config["WriteTimeOut"]
-			m["ExchangeName"] = ""
+			if _,ok:=config["ExchangeName"];ok{
+				m["ExchangeName"] = config["ExchangeName"]
+			}else{
+				m["ExchangeName"] = ""
+			}
 			m["RoutingKey"] = qInfo.Queue
 			go SingleSend(keyString,m,ResultChan)
 			NeedWaitCount++
@@ -70,11 +74,7 @@ func AllQueueOp(key string,config map[string]string,resultBackChan chan int){
 			}else{
 				m["AutoAck"] = "0"
 			}
-			if _,ok:=config["ExchangeName"];ok{
-				m["ExchangeName"] = config["ExchangeName"]
-			}else{
-				m["ExchangeName"] = ""
-			}
+
 			NeedWaitCount++
 			go SingleConsume(keyString,m,ResultChan)
 			break

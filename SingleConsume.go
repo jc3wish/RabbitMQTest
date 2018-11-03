@@ -41,6 +41,7 @@ func SingleConsume(key string,config map[string]string,resultBackChan chan int){
 	for i:=1;i<=ConnectCount;i++ {
 		conn := NewConn(AmqpUri)
 		if conn.err != nil{
+			ResultChan <- 1
 			log.Println(AmqpUri,"connect err:",conn.err)
 			continue
 		}
