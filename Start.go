@@ -10,10 +10,33 @@ import (
 	"fmt"
 )
 
+const VERSION  = "RabbitMQTest-v1.0.0-beta.02"
+
+var (
+	v bool
+)
+
+var welcome = `++++++++++++++++++++++++++++++   
+               +                            +
+			   +        RabbitMQTest        +
+               +                            +      Version:{$version}
+               ++++++++++++++++++++++++++++++
+
+              `
+
 func Start(){
+
 	ConfigFile := flag.String("c", "../etc/config.ini", "Test config file path")
 	ConfigKey := flag.String("key", "", "Test config [key]")
+	flag.BoolVar(&v, "v", false, "show version and exit")
 	flag.Parse()
+	if v {
+		fmt.Println(VERSION)
+		os.Exit(0)
+	}
+	strings.Replace(welcome,"{$version}",VERSION,-1)
+	fmt.Println(welcome)
+
 	config.LoadConf(*ConfigFile)
 
 	NeenBackCount := 0
@@ -34,6 +57,7 @@ func Start(){
 
 	resultDataChan := make(chan *Result,len(myConf))
 	TestStartTime := time.Now().UnixNano() / 1e6
+	log.Println("Test Start, Time:",TestStartTime)
 	for key,m := range myConf{
 		if _,ok:=m["Method"];!ok{
 			log.Println(key," Method not exsit")
@@ -67,7 +91,6 @@ func Start(){
 		log.Println("Test Over:",TestEndTime,"Use Time(ms):",TestEndTime-TestStartTime)
 		return
 	}
-	log.Println("NeenBackCount:",NeenBackCount)
 
 	ResultData := NewResult()
 	for{
