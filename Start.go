@@ -16,13 +16,14 @@ var (
 	v bool
 )
 
-var welcome = `++++++++++++++++++++++++++++++   
-               +                            +
-			   +        RabbitMQTest        +
-               +                            +      Version:{$version}
-               ++++++++++++++++++++++++++++++
+var welcome string = `
+++++++++++++++++++++++++++++++   
++                            +
++        RabbitMQTest        +
++                            +      Version:{$version}
+++++++++++++++++++++++++++++++           By:jc3wish
 
-              `
+`
 
 func Start(){
 
@@ -34,7 +35,7 @@ func Start(){
 		fmt.Println(VERSION)
 		os.Exit(0)
 	}
-	strings.Replace(welcome,"{$version}",VERSION,-1)
+	welcome = strings.Replace(welcome,"{$version}",VERSION,-1)
 	fmt.Println(welcome)
 
 	config.LoadConf(*ConfigFile)
