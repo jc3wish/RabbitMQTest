@@ -41,8 +41,8 @@ func SingleSend(key string,config map[string]string,resultDataChan chan *Result)
 	AmqpUri := config["Uri"]
 
 	OverCount := 0
-	NeedWaitCount := ConnectCount*ChannelCount
-	ResultChan := make(chan int,NeedWaitCount)
+	NeedWaitCount := 0
+	ResultChan := make(chan int,ConnectCount*ChannelCount)
 
 	SendStartTime := time.Now().UnixNano() / 1e6
 	log.Println(key,"SingleSend start",SendStartTime)
@@ -57,7 +57,6 @@ func SingleSend(key string,config map[string]string,resultDataChan chan *Result)
 		for k := 1; k <= ChannelCount; k++ {
 			ch, err := conn.NewChannel(WaitConfirmBool)
 			if err != nil {
-				ResultChan <- 1
 				log.Println(key,"NewChannel err:",k,i,err)
 				ResultData.ChanneFail++
 				continue
@@ -81,6 +80,7 @@ func SingleSend(key string,config map[string]string,resultDataChan chan *Result)
 				ResultChan <- FailCount
 				ch.ch.Close()
 			}(k,ch)
+			NeedWaitCount++
 		}
 	}
 

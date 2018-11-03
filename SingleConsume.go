@@ -42,7 +42,7 @@ func SingleConsume(key string,config map[string]string,resultDataChan chan *Resu
 	for i:=1;i<=ConnectCount;i++ {
 		conn := NewConn(AmqpUri)
 		if conn.err != nil{
-			ResultChan <- 1
+			ResultChan <- 0
 			log.Println(AmqpUri,"connect err:",conn.err)
 			ResultData.ConnectFail++
 			continue
@@ -50,7 +50,7 @@ func SingleConsume(key string,config map[string]string,resultDataChan chan *Resu
 		ResultData.ConnectSuccess++
 		ch, err := conn.NewChannel(false)
 		if err != nil {
-			ResultChan <- 1
+			ResultChan <- 0
 			log.Println(key,"NewChannel err:",i,err)
 			ResultData.ChanneFail++
 			continue
