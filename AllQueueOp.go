@@ -29,7 +29,8 @@ func AllQueueOp(key string,config map[string]string,resultDataChan chan *Result)
 
 	OverCount := 0
 	NeedWaitCount := 0
-	ResultChan := make(chan *Result,NeedWaitCount)
+	WriteNeedWaitCount,ConsumeNeedWaitCount:=0,0
+	ResultChan := make(chan *Result,10000)
 
 	log.Println(key,"AllQueueOp start",AllStartTime)
 
@@ -74,6 +75,7 @@ func AllQueueOp(key string,config map[string]string,resultDataChan chan *Result)
 			m["RoutingKey"] = qInfo.Queue
 			go SingleSend(keyString,m,ResultChan)
 			NeedWaitCount++
+			WriteNeedWaitCount++
 			break
 		case "all_consume":
 			m["ConnectCount"] = config["ConnectCount"]
@@ -91,6 +93,7 @@ func AllQueueOp(key string,config map[string]string,resultDataChan chan *Result)
 			}
 
 			NeedWaitCount++
+			ConsumeNeedWaitCount++
 			go SingleConsume(keyString,m,ResultChan)
 			break
 		default:
@@ -111,6 +114,7 @@ func AllQueueOp(key string,config map[string]string,resultDataChan chan *Result)
 				m2["ConsumeCount"] = "0"
 			}
 			go SingleConsume(keyString,m2,ResultChan)
+			ConsumeNeedWaitCount++
 
 			m["ConnectCount"] = config["WriteConnectCount"]
 			m["DeliveryMode"] = config["DeliveryMode"]
@@ -126,6 +130,7 @@ func AllQueueOp(key string,config map[string]string,resultDataChan chan *Result)
 			}
 			m["RoutingKey"] = qInfo.Queue
 			go SingleSend(keyString,m,ResultChan)
+			WriteNeedWaitCount++
 			break
 		}
 	}
@@ -133,6 +138,23 @@ func AllQueueOp(key string,config map[string]string,resultDataChan chan *Result)
 	if NeedWaitCount == 0{
 		return
 	}
+	var QPSDisplay = func(){
+		AllEndTime := time.Now().UnixNano() / 1e6
+		fmt.Println(" ")
+		UseTime := float64(AllEndTime-AllStartTime)
+		log.Println(key,"AllQueueOp ",AllEndTime," had use time(ms):",UseTime)
+		fmt.Println("ConnectSuccess:",ResultData.ConnectSuccess)
+		fmt.Println("ConnectFail:",ResultData.ConnectFail)
+		fmt.Println("ChannelSuccess:",ResultData.ChannelSuccess)
+		fmt.Println("ChanneFail:",ResultData.ChanneFail)
+		fmt.Println("WriteSuccess:",ResultData.WriteSuccess)
+		fmt.Println("WriteFail:",ResultData.WriteFail)
+		fmt.Println("CosumeSuccess:",ResultData.CosumeSuccess)
+		fmt.Println("Write QPS:",float64(ResultData.WriteSuccess)/UseTime*1000)
+		fmt.Println("Consume QPS:",float64(ResultData.CosumeSuccess)/UseTime*1000)
+	}
+
+	OverConsumeNeedWaitCount,OverWriteNeedWaitCount := 0,0
 	loop:
 	for{
 		select {
@@ -148,36 +170,21 @@ func AllQueueOp(key string,config map[string]string,resultDataChan chan *Result)
 			if OverCount >= NeedWaitCount {
 				break loop
 			}
-		case <-time.After(100 * time.Second):
-			AllEndTime := time.Now().UnixNano() / 1e6
-			fmt.Println(" ")
-			UseTime := float64(AllEndTime-AllStartTime)
-			log.Println(key,"AllQueueOp end",AllEndTime," had use time(ms):",UseTime)
-			fmt.Println("ConnectSuccess:",ResultData.ConnectSuccess)
-			fmt.Println("ConnectFail:",ResultData.ConnectFail)
-			fmt.Println("ChannelSuccess:",ResultData.ChannelSuccess)
-			fmt.Println("ChanneFail:",ResultData.ChanneFail)
-			fmt.Println("WriteSuccess:",ResultData.WriteSuccess)
-			fmt.Println("WriteFail:",ResultData.WriteFail)
-			fmt.Println("CosumeSuccess:",ResultData.CosumeSuccess)
-			fmt.Println("Write QPS:",float64(ResultData.WriteSuccess)/UseTime*1000)
-			fmt.Println("Consume QPS:",float64(ResultData.CosumeSuccess)/UseTime*1000)
+			if data.Type == 1{
+				OverWriteNeedWaitCount++
+				if OverWriteNeedWaitCount >= WriteNeedWaitCount{
+					QPSDisplay()
+				}
+			}else{
+				OverConsumeNeedWaitCount++
+				if OverConsumeNeedWaitCount >= ConsumeNeedWaitCount{
+					QPSDisplay()
+				}
+			}
+		case <-time.After(10 * time.Second):
+			QPSDisplay()
 			break
 		}
 	}
-	AllEndTime := time.Now().UnixNano() / 1e6
-	fmt.Println(" ")
-	UseTime := float64(AllEndTime-AllStartTime)
-
-	log.Println(key,"AllQueueOp end",AllEndTime," time(ms):",UseTime)
-	fmt.Println("ConnectSuccess:",ResultData.ConnectSuccess)
-	fmt.Println("ConnectFail:",ResultData.ConnectFail)
-	fmt.Println("ChannelSuccess:",ResultData.ChannelSuccess)
-	fmt.Println("ChanneFail:",ResultData.ChanneFail)
-	fmt.Println("WriteSuccess:",ResultData.WriteSuccess)
-	fmt.Println("WriteFail:",ResultData.WriteFail)
-	fmt.Println("CosumeSuccess:",ResultData.CosumeSuccess)
-	fmt.Println("Write QPS:",float64(ResultData.WriteSuccess)/UseTime*1000)
-	fmt.Println("Consume QPS:",float64(ResultData.CosumeSuccess)/UseTime*1000)
-
+	//QPSDisplay()
 }

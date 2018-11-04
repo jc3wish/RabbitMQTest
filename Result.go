@@ -8,6 +8,7 @@ type Result struct {
 	WriteSuccess int
 	WriteFail int
 	CosumeSuccess int
+	Type int8
 }
 
 func NewResult() *Result{
@@ -19,7 +20,12 @@ func NewResult() *Result{
 		WriteSuccess:0,
 		WriteFail:0,
 		CosumeSuccess:0,
+		Type:0,
 	}
+}
+
+func (This *Result) setType(Type int8){
+	This.Type = Type
 }
 
 func (This *Result) addValueConnectSuccess(n int){

@@ -13,6 +13,7 @@ import (
 
 func SingleSend(key string,config map[string]string,resultDataChan chan *Result){
 	ResultData := NewResult()
+	ResultData.Type = 1
 	WriteTimeOut := GetIntDefault(config["WriteTimeOut"],1000)
 	DeliveryMode := uint8(GetIntDefault(config["DeliveryMode"],2))
 

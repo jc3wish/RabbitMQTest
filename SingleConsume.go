@@ -11,6 +11,7 @@ import (
 
 func SingleConsume(key string,config map[string]string,resultDataChan chan *Result){
 	ResultData := NewResult()
+	ResultData.Type = 2
 	ConsumeTimeOut := GetIntDefault(config["ConsumeTimeOut"],100)
 	ConnectCount := GetIntDefault(config["ConnectCount"],1)
 	AutoAck := GetIntDefault(config["AutoAck"],0)
