@@ -10,7 +10,7 @@ import (
 	"fmt"
 )
 
-const VERSION  = "RabbitMQTest-v1.0.0-beta.02"
+const VERSION  = "RabbitMQTest-v1.0.0-release"
 
 var (
 	v bool
