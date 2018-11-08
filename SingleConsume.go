@@ -38,8 +38,8 @@ func SingleConsume(key string,config map[string]string,resultDataChan chan *Resu
 	NeedWaitCount := ConnectCount
 	ResultChan := make(chan int,NeedWaitCount+2)
 
-	SingleStartTime := time.Now().UnixNano() / 1e6
-	log.Println(key,"SingleConsume start",SingleStartTime)
+	//SingleStartTime := time.Now().UnixNano() / 1e6
+	//log.Println(key,"SingleConsume start",SingleStartTime)
 	for i:=1;i<=ConnectCount;i++ {
 		conn := NewConn(AmqpUri)
 		if conn.err != nil{
@@ -59,8 +59,8 @@ func SingleConsume(key string,config map[string]string,resultDataChan chan *Resu
 		ResultData.ChannelSuccess++
 		ch.SetConsumeTimeOut(ConsumeTimeOut)
 		go func(n int) {
-			StartTime:=time.Now().UnixNano() / 1e6
-			log.Println(key,"consume channel",n,QueueName,"start",StartTime)
+			//StartTime:=time.Now().UnixNano() / 1e6
+			//log.Println(key,"consume channel",n,QueueName,"start",StartTime)
 			//Cosume(ch,&QueueName,&ConsumeCount)
 
 			msgs, err := ch.ch.Consume(
@@ -93,8 +93,8 @@ func SingleConsume(key string,config map[string]string,resultDataChan chan *Resu
 					}
 				}
 			}
-			EndTime := time.Now().UnixNano() / 1e6
-			log.Println(key,"consume channel",n,"end",EndTime," time(ms):",EndTime-StartTime,QueueName,"cosumeCount:",HadCosumeCount)
+			//EndTime := time.Now().UnixNano() / 1e6
+			//log.Println(key,"consume channel",n,"end",EndTime," time(ms):",EndTime-StartTime,QueueName,"cosumeCount:",HadCosumeCount)
 			ResultChan <- HadCosumeCount
 			ch.ch.Close()
 			conn.conn.Close()
@@ -111,7 +111,7 @@ func SingleConsume(key string,config map[string]string,resultDataChan chan *Resu
 			}
 		}
 	}
-	SingleEndTime := time.Now().UnixNano() / 1e6
+	//SingleEndTime := time.Now().UnixNano() / 1e6
 	resultDataChan <- ResultData
-	log.Println(key,"SingleConsume end",SingleEndTime," time(ms):",SingleEndTime-SingleStartTime)
+	//log.Println(key,"SingleConsume end",SingleEndTime," time(ms):",SingleEndTime-SingleStartTime)
 }

@@ -2,7 +2,6 @@ package RabbitMQTest
 
 import (
 	log "log"
-	"time"
 	"strings"
 	"math/rand"
 )
@@ -45,8 +44,8 @@ func SingleSend(key string,config map[string]string,resultDataChan chan *Result)
 	NeedWaitCount := 0
 	ResultChan := make(chan int,ConnectCount*ChannelCount)
 
-	SendStartTime := time.Now().UnixNano() / 1e6
-	log.Println(key,"SingleSend start",SendStartTime)
+	//SendStartTime := time.Now().UnixNano() / 1e6
+	//log.Println(key,"SingleSend start",SendStartTime)
 	for i:=1;i<=ConnectCount;i++ {
 		conn := NewConn(AmqpUri)
 		if conn.err != nil{
@@ -66,8 +65,8 @@ func SingleSend(key string,config map[string]string,resultDataChan chan *Result)
 			ch.SetWriteTimeOut(WriteTimeOut)
 			go func(n int,ch *Channel) {
 				FailCount:=0;
-				StartTime:=time.Now().UnixNano() / 1e6
-				log.Println(key,"send channel",n,ExchangeName,RoutingKey,"start",StartTime)
+				//StartTime:=time.Now().UnixNano() / 1e6
+				//log.Println(key,"send channel",n,ExchangeName,RoutingKey,"start",StartTime)
 				for icount := 0; icount < ChanneWriteCount; icount++ {
 					_,err := SendMQ(ch, &ExchangeName, &RoutingKey, &DeliveryMode, BodyList[rand.Intn(sizeLen)])
 					if err != nil{
@@ -76,8 +75,8 @@ func SingleSend(key string,config map[string]string,resultDataChan chan *Result)
 						continue
 					}
 				}
-				EndTime := time.Now().UnixNano() / 1e6
-				log.Println(key,"send channel",n,"end",EndTime," time(ms):",EndTime-StartTime,ExchangeName,RoutingKey,"sendCount:",ChanneWriteCount)
+				//EndTime := time.Now().UnixNano() / 1e6
+				//log.Println(key,"send channel",n,"end",EndTime," time(ms):",EndTime-StartTime,ExchangeName,RoutingKey,"sendCount:",ChanneWriteCount)
 				ResultChan <- FailCount
 				ch.ch.Close()
 			}(k,ch)
@@ -120,7 +119,7 @@ func SingleSend(key string,config map[string]string,resultDataChan chan *Result)
 		}
 		*/
 	}
-	SendEndTime := time.Now().UnixNano() / 1e6
-	log.Println(key,"SingleSend end",SendEndTime," time(ms):",SendEndTime-SendStartTime)
+	//SendEndTime := time.Now().UnixNano() / 1e6
+	//log.Println(key,"SingleSend end",SendEndTime," time(ms):",SendEndTime-SendStartTime)
 	resultDataChan <- ResultData
 }
