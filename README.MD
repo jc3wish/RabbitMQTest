@@ -22,15 +22,15 @@ RoutingKey=testQueue
 #写入等待返回多久
 WriteTimeOut=10
 #1不持久化  , 2 持久化
-DeliveryMode=2
+DeliveryMode=1
 #写入的数据大小,多个用逗号隔开,随机写入,单位byte
 DataSize=1024,4096
 #连接数
 ConnectCount=1
 #每个连接开启多个通道
-ChannelCount=1
+ChannelCount=2
 #每个通道总的写入多少条数据
-ChanneWriteCount=1000
+ChanneWriteCount=5000
 #开启返回confirm模式
 WaitConfirm=1
 
@@ -148,7 +148,39 @@ ChannelCount=1
 ConnectTimeOut=100
 
 ```
+
+
+
 #### 运行
+```
+./StartTest -c ../etc/config.ini -key singleSend
+
+++++++++++++++++++++++++++++++
++                            +
++        RabbitMQTest        +
++                            +      Version:RabbitMQTest-v1.0.0-release
+++++++++++++++++++++++++++++++           By:jc3wish
+
+
+2018/11/19 12:07:55 Test Start, Time: 1542600475863
+
+2018/11/19 12:08:01 Test Over: 1542600481199 Use Time(ms): 5336
+ConnectSuccess: 1
+ConnectFail: 0
+ChannelSuccess: 2
+ChanneFail: 0
+WriteSuccess: 10000
+WriteFail: 0
+CosumeSuccess: 0
+Write QPS: 1874.062968515742
+Consume QPS: 0
+
+```
+
+#### 备注
+
+假如要同时运行多个 key 用逗号隔，例如：
+
 ```
 ./StartTest -c ../etc/config.ini -key singleSend,singleConsume
 
