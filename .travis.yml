@@ -9,6 +9,7 @@ go:
     - "1.11"
 
 before_install:
+    - go get github.com/streadway/amqp
     - go get github.com/jc3wish/RabbitMQTest/src
 
 install:
