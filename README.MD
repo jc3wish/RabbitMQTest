@@ -11,7 +11,7 @@ go build ./RabbitMQTest.go
 
 #### 配置参数
 
-[**etc/config.ini**](https://github.com/jc3wish/RabbitMQTest/blob/master/etc/config.ini)
+[etc/config.ini](https://github.com/jc3wish/RabbitMQTest/blob/master/etc/config.ini)
 
 
 #### 案例 1

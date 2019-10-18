@@ -50,13 +50,17 @@ func LoadConf(conffile string) map[string]map[string]string {
 		}
 		switch {
 		case len(line) == 0:
+			break
 		case line[0] == '[' && line[len(line)-1] == ']':
 			stringKey = strings.TrimSpace(line[1 : len(line)-1])
 			per[stringKey] = make(map[string]string)
+			break
 		case line[0] == '#':
+			break
 		default:
 			i := strings.IndexAny(line, "=")
 			per[stringKey][strings.TrimSpace(line[0:i])] = strings.TrimSpace(line[i+1:])
+			break
 		}
 	}
 	MyConf = per
